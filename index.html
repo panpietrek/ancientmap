@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antyczna Mapa Aten - Zweryfikowane Adresy GPS</title>
+    <title>Antyczna Mapa Aten - Precyzyjne Adresy</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap');
@@ -355,7 +355,6 @@
             attribution: 'Tiles © Esri'
         }).addTo(map);
 
-        // Precyzyjnie zweryfikowane współrzędne budynków i głównych wejść w Atenach
         const poiList = [
             { id: 1, name: "Athens Center Square Hotel", address: "Sofokleous 15", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9798, lng: 23.7259, desc: "Baza wypadowa. Sofokleous 15.", icon: "🏨", tag: "Hotel" },
             { id: 2, name: "Agora Ateńska & Hefajstejon", address: "Adrianou 24", days: ["day1"], cat: "sight", lat: 37.9753, lng: 23.7225, desc: "Centrum starożytnych Aten. Adrianou 24.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
@@ -416,9 +415,12 @@
             const marker = L.marker([poi.lat, poi.lng], { icon: customIcon }).addTo(map);
             
             function updatePopupContent() {
-                const googleNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
-                let distanceHtml = "";
+                // KLUCZOWA ZMIANA: Przekazujemy nazwę i adres tekstowy zamiast współrzędnych, 
+                // dzięki czemu Google Maps nie "przyciąga" błędnie do sąsiednich numerów.
+                const destinationQuery = encodeURIComponent(poi.name + ", " + poi.address + ", Athens, Greece");
+                const googleNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${destinationQuery}`;
                 
+                let distanceHtml = "";
                 if (userCoords) {
                     const dist = calculateDistance(userCoords.lat, userCoords.lng, poi.lat, poi.lng);
                     distanceHtml = `<div class="popup-distance">📍 ${formatDistance(dist)}</div><br>`;
