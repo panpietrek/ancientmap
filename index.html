@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antyczna Mapa Aten - Pełne Filtrowanie</title>
+    <title>Antyczna Mapa Aten - Panel i Odległości GPS</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap');
@@ -72,7 +72,7 @@
 
         /* Lewe menu z dniami */
         #sidebar {
-            width: 230px;
+            width: 220px;
             background: #f9f2e3;
             border-right: 3px solid #8b5a2b;
             padding: 8px;
@@ -121,6 +121,64 @@
             margin-top: auto;
         }
 
+        /* Prawé rozwijane menu atrakcji */
+        #right-panel-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background: #4a3525;
+            color: #d4af37;
+            border: 2px solid #b8860b;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+
+        #right-panel {
+            position: absolute;
+            top: 0;
+            right: -280px;
+            width: 260px;
+            height: 100%;
+            background: rgba(249, 242, 227, 0.96);
+            border-left: 3px solid #8b5a2b;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: right 0.3s ease-in-out;
+            padding: 50px 10px 10px 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        #right-panel.open {
+            right: 0;
+        }
+
+        .poi-item {
+            background: #fff;
+            border: 1px solid #b8860b;
+            border-radius: 5px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+
+        .poi-item:hover {
+            background: #f4e4bc;
+        }
+
+        .poi-item-title {
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            color: #8b0000;
+            font-size: 0.8rem;
+        }
+
         #map {
             flex-grow: 1;
             height: 100%;
@@ -163,7 +221,18 @@
         .popup-desc {
             font-size: 0.8rem;
             line-height: 1.3;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+        }
+
+        .popup-distance {
+            font-size: 0.75rem;
+            color: #004d40;
+            font-weight: bold;
+            margin-bottom: 6px;
+            background: #e0f2f1;
+            padding: 3px 6px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
         .nav-btn {
@@ -215,6 +284,10 @@
             #map {
                 height: calc(100% - 110px);
             }
+            #right-panel {
+                width: 80%;
+                right: -80%;
+            }
         }
     </style>
 </head>
@@ -228,6 +301,17 @@
             <button class="top-btn" onclick="filterByCategory('hotel', event)">🏨 Hotel</button>
             <button class="top-btn" onclick="filterByCategory('sight', event)">🏺 Zabytki</button>
             <button class="top-btn" onclick="filterByCategory('food', event)">🍷 Kulinaria</button>
+        </div>
+    </div>
+
+    <!-- Przycisk rozwijania prawego panelu -->
+    <button id="right-panel-toggle" onclick="toggleRightPanel()" title="Lista atrakcji na ten dzień">📋</button>
+
+    <!-- Prawie rozwijane menu atrakcji -->
+    <div id="right-panel">
+        <div class="sidebar-title">Atrakcje dnia</div>
+        <div id="panel-poi-list">
+            <!-- Tutaj dynamicznie ładują się punkty -->
         </div>
     </div>
 
@@ -257,29 +341,54 @@
         }).addTo(map);
 
         const poiList = [
-            { name: "Athens Center Square Hotel", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9800, lng: 23.7258, desc: "Twoja baza wypadowa. Tuż obok targu Varvakeios i Psiri.", icon: "🏨", tag: "Hotel" },
-            { name: "Agora Ateńska & Hefajstejon", days: ["day1"], cat: "sight", lat: 37.9749, lng: 23.7225, desc: "Centrum starożytnych Aten z najlepiej zachowaną świątynią.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
-            { name: "Monastiraki & Psiri (Street Food)", days: ["day1"], cat: "food", lat: 37.9761, lng: 23.7256, desc: "Kultowe souvlaki u O Thanasis i wieczorny klimat.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
-            { name: "Anafiotika & Plaka", days: ["day1"], cat: "sight", lat: 37.9728, lng: 23.7280, desc: "Malownicza wysepka u podnóża Akropolu i klimatyczne uliczki.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
+            { id: 1, name: "Athens Center Square Hotel", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9800, lng: 23.7258, desc: "Twoja baza wypadowa. Tuż obok targu Varvakeios i Psiri.", icon: "🏨", tag: "Hotel" },
+            { id: 2, name: "Agora Ateńska & Hefajstejon", days: ["day1"], cat: "sight", lat: 37.9749, lng: 23.7225, desc: "Centrum starożytnych Aten z najlepiej zachowaną świątynią.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
+            { id: 3, name: "Monastiraki & Psiri (Street Food)", days: ["day1"], cat: "food", lat: 37.9761, lng: 23.7256, desc: "Kultowe souvlaki u O Thanasis i wieczorny klimat.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
+            { id: 4, name: "Anafiotika & Plaka", days: ["day1"], cat: "sight", lat: 37.9728, lng: 23.7280, desc: "Malownicza wysepka u podnóża Akropolu i klimatyczne uliczki.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
             
-            { name: "Akropol Ateński & Partenon", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Poranne zwiedzanie bez tłumów.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
-            { name: "Nowe Muzeum Akropolu", days: ["day2"], cat: "sight", lat: 37.9684, lng: 23.7285, desc: "Światowej klasy eksponaty z widokiem na Partenon.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
-            { name: "Plac Syntagma & Zmiana Warty", days: ["day2"], cat: "sight", lat: 37.9755, lng: 23.7348, desc: "Parlament i tradycyjna zmiana gwardzistów Evzones.", icon: "💂", tag: "Dzień 2 / Zabytek" },
-            { name: "Wzgórze Lycabettus", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – genialny zachód słońca nad miastem.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
-            { name: "Mavros Gatos (Psiri)", days: ["day2"], cat: "food", lat: 37.9774, lng: 23.7229, desc: "Tradycyjna kolacja w tawernie (saganaki, jagnięcina).", icon: "🥘", tag: "Dzień 2 / Kulinaria" },
+            { id: 5, name: "Akropol Ateński & Partenon", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Poranne zwiedzanie bez tłumów.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { id: 6, name: "Nowe Muzeum Akropolu", days: ["day2"], cat: "sight", lat: 37.9684, lng: 23.7285, desc: "Światowej klasy eksponaty z widokiem na Partenon.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { id: 7, name: "Plac Syntagma & Zmiana Warty", days: ["day2"], cat: "sight", lat: 37.9755, lng: 23.7348, desc: "Parlament i tradycyjna zmiana gwardzistów Evzones.", icon: "💂", tag: "Dzień 2 / Zabytek" },
+            { id: 8, name: "Wzgórze Lycabettus", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – genialny zachód słońca nad miastem.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
+            { id: 9, name: "Mavros Gatos (Psiri)", days: ["day2"], cat: "food", lat: 37.9774, lng: 23.7229, desc: "Tradycyjna kolacja w tawernie (saganaki, jagnięcina).", icon: "🥘", tag: "Dzień 2 / Kulinaria" },
 
-            { name: "Narodowe Muzeum Archeologiczne", days: ["day3"], cat: "sight", lat: 37.9890, lng: 23.7330, desc: "Największy skarbiec antycznych artefaktów w Grecji.", icon: "🏺", tag: "Dzień 3 / Zabytek" },
-            { name: "Epirus Tavern (Varvakeios)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Autentyczna jadłodajnia w hali targowej – domowa musaka i stifado.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
-            { name: "Świątynia Zeusa i Stadion Panatenajski", days: ["day3"], cat: "sight", lat: 37.9683, lng: 23.7411, desc: "Potężne kolumny Zeusa i stadion z białego marmuru.", icon: "🏟️", tag: "Dzień 3 / Zabytek" },
-            { name: "Karamanlidika tou Fani", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Wyjątkowa kolacja: bizantyjskie wędliny, sery i mezedes.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
+            { id: 10, name: "Narodowe Muzeum Archeologiczne", days: ["day3"], cat: "sight", lat: 37.9890, lng: 23.7330, desc: "Największy skarbiec antycznych artefaktów w Grecji.", icon: "🏺", tag: "Dzień 3 / Zabytek" },
+            { id: 11, name: "Epirus Tavern (Varvakeios)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Autentyczna jadłodajnia w hali targowej – domowa musaka i stifado.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
+            { id: 12, name: "Świątynia Zeusa i Stadion Panatenajski", days: ["day3"], cat: "sight", lat: 37.9683, lng: 23.7411, desc: "Potężne kolumny Zeusa i stadion z białego marmuru.", icon: "🏟️", tag: "Dzień 3 / Zabytek" },
+            { id: 13, name: "Karamanlidika tou Fani", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Wyjątkowa kolacja: bizantyjskie wędliny, sery i mezedes.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
 
-            { name: "Targ Varvakeios & Pamiątki", days: ["day4"], cat: "sight", lat: 37.9804, lng: 23.7270, desc: "Zakupy lokalnych greckich specjałów, oliwy i pamiątek przed wylotem.", icon: "🛍️", tag: "Dzień 4 / Inne" }
+            { id: 14, name: "Targ Varvakeios & Pamiątki", days: ["day4"], cat: "sight", lat: 37.9804, lng: 23.7270, desc: "Zakupy lokalnych greckich specjałów, oliwy i pamiątek przed wylotem.", icon: "🛍️", tag: "Dzień 4 / Inne" }
         ];
 
         let markers = [];
         let userMarker = null;
+        let userCoords = null; // Przechowuje pozycję GPS użytkownika
         let currentDay = 'all';
         let currentCategory = 'all';
+
+        // Funkcja obliczająca odległość w metrach / kilometrach (wzór Haversine)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Promień Ziemi w metrach
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c; 
+        }
+
+        function formatDistance(meters) {
+            if (meters < 1000) {
+                return Math.round(meters) + " m od Ciebie";
+            } else {
+                return (meters / 1000).toFixed(2) + " km od Ciebie";
+            }
+        }
 
         // Inicjalizacja markerów
         poiList.forEach(poi => {
@@ -291,21 +400,63 @@
             });
 
             const marker = L.marker([poi.lat, poi.lng], { icon: customIcon }).addTo(map);
-            const googleNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
+            
+            // Funkcja generująca zawartość popupu z uwzględnieniem odległości GPS
+            function updatePopupContent() {
+                const googleNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
+                let distanceHtml = "";
+                
+                if (userCoords) {
+                    const dist = calculateDistance(userCoords.lat, userCoords.lng, poi.lat, poi.lng);
+                    distanceHtml = `<div class="popup-distance">📍 ${formatDistance(dist)}</div><br>`;
+                }
 
-            marker.bindPopup(`
-                <div class="popup-title">${poi.name}</div>
-                <span class="popup-tag">${poi.tag}</span>
-                <div class="popup-desc">${poi.desc}</div>
-                <a href="${googleNavUrl}" target="_blank" class="nav-btn" title="Nawiguj">🧭</a>
-            `);
+                return `
+                    <div class="popup-title">${poi.name}</div>
+                    <span class="popup-tag">${poi.tag}</span>
+                    <div class="popup-desc">${poi.desc}</div>
+                    ${distanceHtml}
+                    <a href="${googleNavUrl}" target="_blank" class="nav-btn" title="Nawiguj">🧭</a>
+                `;
+            }
+
+            marker.bindPopup(updatePopupContent());
+            
+            // Nasłuchiwanie otwarcia popupu, by odświeżyć dystans
+            marker.on('popupopen', () => {
+                marker.setPopupContent(updatePopupContent());
+            });
 
             marker.days = poi.days;
             marker.category = poi.cat;
+            marker.poiData = poi;
             markers.push(marker);
         });
 
-        // Globalna funkcja filtrowania (uwzględniająca oba filtry naraz)
+        // Aktualizacja listy w prawym panelu
+        function updateRightPanel() {
+            const listContainer = document.getElementById('panel-poi-list');
+            listContainer.innerHTML = '';
+
+            markers.forEach(marker => {
+                const matchDay = (currentDay === 'all' || marker.days.includes(currentDay));
+                const matchCat = (currentCategory === 'all' || marker.category === currentCategory);
+
+                if (matchDay && matchCat) {
+                    const item = document.createElement('div');
+                    item.className = 'poi-item';
+                    item.innerHTML = `<div class="poi-item-title">${marker.poiData.icon} ${marker.poiData.name}</div>`;
+                    item.onclick = () => {
+                        map.setView([marker.poiData.lat, marker.poiData.lng], 17);
+                        marker.openPopup();
+                        if(window.innerWidth <= 768) toggleRightPanel(); // Schowaj panel na mobilkach po kliknięciu
+                    };
+                    listContainer.appendChild(item);
+                }
+            });
+        }
+
+        // Globalna funkcja filtrowania
         function updateFilters() {
             let bounds = [];
 
@@ -320,6 +471,8 @@
                     map.removeLayer(marker);
                 }
             });
+
+            updateRightPanel();
 
             if (currentDay !== 'all' && bounds.length > 0) {
                 map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
@@ -342,6 +495,10 @@
             updateFilters();
         }
 
+        function toggleRightPanel() {
+            document.getElementById('right-panel').classList.toggle('open');
+        }
+
         function locateUser() {
             if (!navigator.geolocation) {
                 alert("Twoja przeglądarka nie wspiera geolokalizacji.");
@@ -352,6 +509,7 @@
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
+                    userCoords = { lat: lat, lng: lng };
 
                     if (userMarker) {
                         map.removeLayer(userMarker);
@@ -374,6 +532,9 @@
                 { enableHighAccuracy: true }
             );
         }
+
+        // Inicjalizacja początkowa prawego panelu
+        updateRightPanel();
     </script>
 </body>
 </html>
