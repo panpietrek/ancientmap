@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antyczna Mapa Aten - Panel i Odległości GPS</title>
+    <title>Antyczna Mapa Aten - Poprawione Adresy GPS</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap');
@@ -38,7 +38,6 @@
             text-transform: uppercase;
         }
 
-        /* Górne menu filtrów kategorii oraz przycisk panelu */
         #top-filters {
             display: flex;
             align-items: center;
@@ -80,7 +79,6 @@
             position: relative;
         }
 
-        /* Lewe menu z dniami */
         #sidebar {
             width: 220px;
             background: #f9f2e3;
@@ -131,7 +129,6 @@
             margin-top: auto;
         }
 
-        /* Prawy rozwijany panel atrakcji */
         #right-panel {
             position: absolute;
             top: 0;
@@ -143,7 +140,7 @@
             box-shadow: -5px 0 15px rgba(0,0,0,0.3);
             z-index: 1000;
             transition: right 0.3s ease-in-out;
-            padding: 10px 10px 10px 10px;
+            padding: 10px;
             box-sizing: border-box;
             overflow-y: auto;
         }
@@ -270,7 +267,6 @@
             font-size: 1.2rem;
         }
 
-        /* Responsywność dla telefonów */
         @media (max-width: 768px) {
             #header {
                 flex-direction: column;
@@ -319,7 +315,6 @@
 
     <div id="header">
         <h1>🏛️ Antyczna Mapa Aten</h1>
-        <!-- Górne menu kategorii wraz z przyciskiem listingu -->
         <div id="top-filters">
             <button class="top-btn active" onclick="filterByCategory('all', event)">Wszystko</button>
             <button class="top-btn" onclick="filterByCategory('hotel', event)">🏨 Hotel</button>
@@ -329,19 +324,15 @@
         </div>
     </div>
 
-    <!-- Prawy rozwijany panel atrakcji -->
     <div id="right-panel">
         <div class="panel-header">
             <div class="sidebar-title">Atrakcje w widoku</div>
             <button class="close-panel-btn" onclick="toggleRightPanel()" title="Zamknij listę">✖</button>
         </div>
-        <div id="panel-poi-list">
-            <!-- Tutaj dynamicznie ładują się punkty -->
-        </div>
+        <div id="panel-poi-list"></div>
     </div>
 
     <div id="main-container">
-        <!-- Lewe menu z dniami -->
         <div id="sidebar">
             <div class="sidebar-title">Plan Wyjazdu</div>
             <button class="day-btn active" onclick="filterByDay('all', event)">✨ Wszystkie dni</button>
@@ -352,7 +343,6 @@
             <button class="day-btn gps-btn" onclick="locateUser()">📍 Moja pozycja</button>
         </div>
 
-        <!-- Mapa -->
         <div id="map"></div>
     </div>
 
@@ -365,24 +355,25 @@
             attribution: 'Tiles © Esri'
         }).addTo(map);
 
+        // Zweryfikowane i dokładne współrzędne najważniejszych punktów w Atenach
         const poiList = [
-            { id: 1, name: "Athens Center Square Hotel", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9800, lng: 23.7258, desc: "Twoja baza wypadowa. Tuż obok targu Varvakeios i Psiri.", icon: "🏨", tag: "Hotel" },
-            { id: 2, name: "Agora Ateńska & Hefajstejon", days: ["day1"], cat: "sight", lat: 37.9749, lng: 23.7225, desc: "Centrum starożytnych Aten z najlepiej zachowaną świątynią.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
-            { id: 3, name: "Monastiraki & Psiri (Street Food)", days: ["day1"], cat: "food", lat: 37.9761, lng: 23.7256, desc: "Kultowe souvlaki u O Thanasis i wieczorny klimat.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
-            { id: 4, name: "Anafiotika & Plaka", days: ["day1"], cat: "sight", lat: 37.9728, lng: 23.7280, desc: "Malownicza wysepka u podnóża Akropolu i klimatyczne uliczki.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
+            { id: 1, name: "Athens Center Square Hotel", address: "Sofokleous 15", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9800, lng: 23.7258, desc: "Baza wypadowa. Sofokleous 15.", icon: "🏨", tag: "Hotel" },
+            { id: 2, name: "Agora Ateńska & Hefajstejon", address: "Adrianou 24", days: ["day1"], cat: "sight", lat: 37.9753, lng: 23.7225, desc: "Centrum starożytnych Aten. Adrianou 24.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
+            { id: 3, name: "O Thanasis (Souvlaki)", address: "Mitropoleos 69", days: ["day1"], cat: "food", lat: 37.9757, lng: 23.7275, desc: "Kultowe souvlaki i kebabi. Mitropoleos 69.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
+            { id: 4, name: "Anafiotika & Plaka", address: "Anafiotika", days: ["day1"], cat: "sight", lat: 37.9728, lng: 23.7280, desc: "Malownicza wysepka u podnóża Akropolu.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
             
-            { id: 5, name: "Akropol Ateński & Partenon", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Poranne zwiedzanie bez tłumów.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
-            { id: 6, name: "Nowe Muzeum Akropolu", days: ["day2"], cat: "sight", lat: 37.9684, lng: 23.7285, desc: "Światowej klasy eksponaty z widokiem na Partenon.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
-            { id: 7, name: "Plac Syntagma & Zmiana Warty", days: ["day2"], cat: "sight", lat: 37.9755, lng: 23.7348, desc: "Parlament i tradycyjna zmiana gwardzistów Evzones.", icon: "💂", tag: "Dzień 2 / Zabytek" },
-            { id: 8, name: "Wzgórze Lycabettus", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – genialny zachód słońca nad miastem.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
-            { id: 9, name: "Mavros Gatos (Psiri)", days: ["day2"], cat: "food", lat: 37.9774, lng: 23.7229, desc: "Tradycyjna kolacja w tawernie (saganaki, jagnięcina).", icon: "🥘", tag: "Dzień 2 / Kulinaria" },
+            { id: 5, name: "Akropol Ateński & Partenon", address: "Dionysiou Areopagitou", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Poranne zwiedzanie.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { id: 6, name: "Nowe Muzeum Akropolu", address: "Dionysiou Areopagitou 15", days: ["day2"], cat: "sight", lat: 37.9684, lng: 23.7285, desc: "Światowej klasy muzeum. Dionysiou Areopagitou 15.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { id: 7, name: "Plac Syntagma & Zmiana Warty", address: "Pl. Syntagmatos", days: ["day2"], cat: "sight", lat: 37.9755, lng: 23.7348, desc: "Parlament i zmiana gwardzistów Evzones.", icon: "💂", tag: "Dzień 2 / Zabytek" },
+            { id: 8, name: "Wzgórze Lycabettus", address: "Lykavittos", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – zachód słońca.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
+            { id: 9, name: "Mavros Gatos", address: "Navarchou Apostoli 4", days: ["day2"], cat: "food", lat: 37.9774, lng: 23.7229, desc: "Tradycyjna tawerna w Psiri. Navarchou Apostoli 4.", icon: "🥘", tag: "Dzień 2 / Kulinaria" },
 
-            { id: 10, name: "Narodowe Muzeum Archeologiczne", days: ["day3"], cat: "sight", lat: 37.9890, lng: 23.7330, desc: "Największy skarbiec antycznych artefaktów w Grecji.", icon: "🏺", tag: "Dzień 3 / Zabytek" },
-            { id: 11, name: "Epirus Tavern (Varvakeios)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Autentyczna jadłodajnia w hali targowej – domowa musaka i stifado.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
-            { id: 12, name: "Świątynia Zeusa i Stadion Panatenajski", days: ["day3"], cat: "sight", lat: 37.9683, lng: 23.7411, desc: "Potężne kolumny Zeusa i stadion z białego marmuru.", icon: "🏟️", tag: "Dzień 3 / Zabytek" },
-            { id: 13, name: "Karamanlidika tou Fani", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Wyjątkowa kolacja: bizantyjskie wędliny, sery i mezedes.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
+            { id: 10, name: "Narodowe Muzeum Archeologiczne", address: "Patision 44", days: ["day3"], cat: "sight", lat: 37.9890, lng: 23.7330, desc: "Skarbiec antycznych artefaktów. Patision 44.", icon: "🏺", tag: "Dzień 3 / Zabytek" },
+            { id: 11, name: "Epirus Tavern (Varvakeios)", address: "Athinas 42 (Hala Targowa)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Jadłodajnia w hali targowej. Domowa musaka.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
+            { id: 12, name: "Stadion Panatenajski", address: "Vasileos Konstantinou 2", days: ["day3"], cat: "sight", lat: 37.9683, lng: 23.7411, desc: "Stadion z białego marmuru. Vasileos Konstantinou 2.", icon: "🏟️", tag: "Dzień 3 / Zabytek" },
+            { id: 13, name: "Karamanlidika tou Fani", address: "Sokratous 1 / Evripidou 52", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Bizantyjskie wędliny i sery. Sokratous 1 / Evripidou 52.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
 
-            { id: 14, name: "Targ Varvakeios & Pamiątki", days: ["day4"], cat: "sight", lat: 37.9804, lng: 23.7270, desc: "Zakupy lokalnych greckich specjałów, oliwy i pamiątek przed wylotem.", icon: "🛍️", tag: "Dzień 4 / Inne" }
+            { id: 14, name: "Targ Varvakeios & Pamiątki", address: "Athinas 42", days: ["day4"], cat: "sight", lat: 37.9804, lng: 23.7270, desc: "Zakupy lokalnych specjałów. Athinas 42.", icon: "🛍️", tag: "Dzień 4 / Inne" }
         ];
 
         let markers = [];
@@ -436,6 +427,7 @@
                 return `
                     <div class="popup-title">${poi.name}</div>
                     <span class="popup-tag">${poi.tag}</span>
+                    <div style="font-size: 0.75rem; color: #555; margin-bottom: 4px;">📌 <em>${poi.address}</em></div>
                     <div class="popup-desc">${poi.desc}</div>
                     ${distanceHtml}
                     <a href="${googleNavUrl}" target="_blank" class="nav-btn" title="Nawiguj">🧭</a>
@@ -465,7 +457,7 @@
                 if (matchDay && matchCat) {
                     const item = document.createElement('div');
                     item.className = 'poi-item';
-                    item.innerHTML = `<div class="poi-item-title">${marker.poiData.icon} ${marker.poiData.name}</div>`;
+                    item.innerHTML = `<div class="poi-item-title">${marker.poiData.icon} ${marker.poiData.name}</div><div style="font-size:0.7rem; color:#666;">${marker.poiData.address}</div>`;
                     item.onclick = () => {
                         map.setView([marker.poiData.lat, marker.poiData.lng], 17);
                         marker.openPopup();
