@@ -19,7 +19,7 @@
             background: linear-gradient(180deg, #2b1e16 0%, #3d2b1f 100%);
             color: #d4af37;
             text-align: center;
-            padding: 6px;
+            padding: 6px 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             border-bottom: 3px solid #b8860b;
             height: 35px;
@@ -28,8 +28,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-left: 15px;
-            padding-right: 15px;
         }
 
         #header h1 {
@@ -40,9 +38,10 @@
             text-transform: uppercase;
         }
 
-        /* Górne menu filtrów kategorii */
+        /* Górne menu filtrów kategorii oraz przycisk panelu */
         #top-filters {
             display: flex;
+            align-items: center;
             gap: 4px;
         }
 
@@ -61,6 +60,17 @@
             background: #b8860b;
             color: #1a100a;
             font-weight: bold;
+        }
+
+        .panel-toggle-btn {
+            background: #8b5a2b;
+            color: #fff;
+            border: 1px solid #d4af37;
+            padding: 2px 7px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 4px;
         }
 
         #main-container {
@@ -121,22 +131,7 @@
             margin-top: auto;
         }
 
-        /* Prawé rozwijane menu atrakcji */
-        #right-panel-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 1001;
-            background: #4a3525;
-            color: #d4af37;
-            border: 2px solid #b8860b;
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-        }
-
+        /* Prawy rozwijany panel atrakcji */
         #right-panel {
             position: absolute;
             top: 0;
@@ -148,7 +143,7 @@
             box-shadow: -5px 0 15px rgba(0,0,0,0.3);
             z-index: 1000;
             transition: right 0.3s ease-in-out;
-            padding: 50px 10px 10px 10px;
+            padding: 15px 10px 10px 10px;
             box-sizing: border-box;
             overflow-y: auto;
         }
@@ -295,21 +290,19 @@
 
     <div id="header">
         <h1>🏛️ Antyczna Mapa Aten</h1>
-        <!-- Górne menu kategorii -->
+        <!-- Górne menu kategorii wraz z przyciskiem listingu -->
         <div id="top-filters">
             <button class="top-btn active" onclick="filterByCategory('all', event)">Wszystko</button>
             <button class="top-btn" onclick="filterByCategory('hotel', event)">🏨 Hotel</button>
             <button class="top-btn" onclick="filterByCategory('sight', event)">🏺 Zabytki</button>
             <button class="top-btn" onclick="filterByCategory('food', event)">🍷 Kulinaria</button>
+            <button class="panel-toggle-btn" onclick="toggleRightPanel()" title="Otwórz listę miejsc">📋 Lista</button>
         </div>
     </div>
 
-    <!-- Przycisk rozwijania prawego panelu -->
-    <button id="right-panel-toggle" onclick="toggleRightPanel()" title="Lista atrakcji na ten dzień">📋</button>
-
-    <!-- Prawie rozwijane menu atrakcji -->
+    <!-- Prawy rozwijany panel atrakcji -->
     <div id="right-panel">
-        <div class="sidebar-title">Atrakcje dnia</div>
+        <div class="sidebar-title">Atrakcje w widoku</div>
         <div id="panel-poi-list">
             <!-- Tutaj dynamicznie ładują się punkty -->
         </div>
@@ -362,13 +355,12 @@
 
         let markers = [];
         let userMarker = null;
-        let userCoords = null; // Przechowuje pozycję GPS użytkownika
+        let userCoords = null;
         let currentDay = 'all';
         let currentCategory = 'all';
 
-        // Funkcja obliczająca odległość w metrach / kilometrach (wzór Haversine)
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // Promień Ziemi w metrach
+            const R = 6371e3;
             const φ1 = lat1 * Math.PI/180;
             const φ2 = lat2 * Math.PI/180;
             const Δφ = (lat2-lat1) * Math.PI/180;
@@ -390,7 +382,6 @@
             }
         }
 
-        // Inicjalizacja markerów
         poiList.forEach(poi => {
             const customIcon = L.divIcon({
                 className: 'custom-div-icon',
@@ -401,7 +392,6 @@
 
             const marker = L.marker([poi.lat, poi.lng], { icon: customIcon }).addTo(map);
             
-            // Funkcja generująca zawartość popupu z uwzględnieniem odległości GPS
             function updatePopupContent() {
                 const googleNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
                 let distanceHtml = "";
@@ -422,7 +412,6 @@
 
             marker.bindPopup(updatePopupContent());
             
-            // Nasłuchiwanie otwarcia popupu, by odświeżyć dystans
             marker.on('popupopen', () => {
                 marker.setPopupContent(updatePopupContent());
             });
@@ -433,7 +422,6 @@
             markers.push(marker);
         });
 
-        // Aktualizacja listy w prawym panelu
         function updateRightPanel() {
             const listContainer = document.getElementById('panel-poi-list');
             listContainer.innerHTML = '';
@@ -449,14 +437,13 @@
                     item.onclick = () => {
                         map.setView([marker.poiData.lat, marker.poiData.lng], 17);
                         marker.openPopup();
-                        if(window.innerWidth <= 768) toggleRightPanel(); // Schowaj panel na mobilkach po kliknięciu
+                        if(window.innerWidth <= 768) toggleRightPanel();
                     };
                     listContainer.appendChild(item);
                 }
             });
         }
 
-        // Globalna funkcja filtrowania
         function updateFilters() {
             let bounds = [];
 
@@ -533,7 +520,6 @@
             );
         }
 
-        // Inicjalizacja początkowa prawego panelu
         updateRightPanel();
     </script>
 </body>
