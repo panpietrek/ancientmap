@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antyczna Mapa Aten - Pełne Filtrowanie</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap');
+
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            font-family: 'Georgia', serif;
+            background-color: #f4e4bc;
+            overflow: hidden;
+        }
+
+        #header {
+            background: linear-gradient(180deg, #2b1e16 0%, #3d2b1f 100%);
+            color: #d4af37;
+            text-align: center;
+            padding: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border-bottom: 3px solid #b8860b;
+            height: 35px;
+            z-index: 1000;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        #header h1 {
+            font-family: 'Cinzel', serif;
+            margin: 0;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Górne menu filtrów kategorii */
+        #top-filters {
+            display: flex;
+            gap: 4px;
+        }
+
+        .top-btn {
+            background: #4a3525;
+            color: #f4e4bc;
+            border: 1px solid #b8860b;
+            padding: 3px 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .top-btn.active {
+            background: #b8860b;
+            color: #1a100a;
+            font-weight: bold;
+        }
+
+        #main-container {
+            display: flex;
+            height: calc(100% - 47px);
+            width: 100%;
+            position: relative;
+        }
+
+        /* Lewe menu z dniami */
+        #sidebar {
+            width: 230px;
+            background: #f9f2e3;
+            border-right: 3px solid #8b5a2b;
+            padding: 8px;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .sidebar-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            color: #8b0000;
+            text-align: center;
+            border-bottom: 2px dashed #8b5a2b;
+            padding-bottom: 4px;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .day-btn {
+            background: #4a3525;
+            color: #f4e4bc;
+            border: 1px solid #b8860b;
+            padding: 7px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .day-btn:hover, .day-btn.active {
+            background: #b8860b;
+            color: #1a100a;
+            font-weight: bold;
+        }
+
+        .gps-btn {
+            background: #8b0000 !important;
+            color: #fff !important;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        #map {
+            flex-grow: 1;
+            height: 100%;
+            background: #e5d3b3;
+        }
+
+        .leaflet-tile-container {
+            filter: sepia(0.4) contrast(1.05) brightness(0.95);
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #f9f2e3;
+            border: 2px solid #8b5a2b;
+            border-radius: 6px;
+            color: #2b1e16;
+            font-family: 'Georgia', serif;
+        }
+
+        .popup-title {
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            color: #8b0000;
+            font-size: 0.95rem;
+            border-bottom: 1px dashed #8b5a2b;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+        }
+
+        .popup-tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            background: #8b5a2b;
+            color: #fff;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .popup-desc {
+            font-size: 0.8rem;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .nav-btn {
+            display: block;
+            text-align: center;
+            background: #2e7d32;
+            color: white;
+            text-decoration: none;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 1.2rem;
+        }
+
+        /* Responsywność dla telefonów */
+        @media (max-width: 768px) {
+            #header {
+                flex-direction: column;
+                height: auto;
+                padding: 6px;
+                gap: 4px;
+            }
+            #main-container {
+                flex-direction: column-reverse;
+                height: calc(100% - 65px);
+            }
+            #sidebar {
+                width: 100%;
+                height: 110px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                overflow-x: auto;
+                padding: 5px;
+                gap: 3px;
+                border-right: none;
+                border-top: 3px solid #8b5a2b;
+            }
+            .sidebar-title {
+                display: none;
+            }
+            .day-btn {
+                flex: 1 1 45%;
+                font-size: 0.65rem;
+                padding: 5px;
+                text-align: center;
+            }
+            .gps-btn {
+                margin-top: 0;
+            }
+            #map {
+                height: calc(100% - 110px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>🏛️ Antyczna Mapa Aten</h1>
+        <!-- Górne menu kategorii -->
+        <div id="top-filters">
+            <button class="top-btn active" onclick="filterByCategory('all', event)">Wszystko</button>
+            <button class="top-btn" onclick="filterByCategory('hotel', event)">🏨 Hotel</button>
+            <button class="top-btn" onclick="filterByCategory('sight', event)">🏺 Zabytki</button>
+            <button class="top-btn" onclick="filterByCategory('food', event)">🍷 Kulinaria</button>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <!-- Lewe menu z dniami -->
+        <div id="sidebar">
+            <div class="sidebar-title">Plan Wyjazdu</div>
+            <button class="day-btn active" onclick="filterByDay('all', event)">✨ Wszystkie dni</button>
+            <button class="day-btn" onclick="filterByDay('day1', event)">📅 Dzień 1 (Piątek)</button>
+            <button class="day-btn" onclick="filterByDay('day2', event)">📅 Dzień 2 (Sobota)</button>
+            <button class="day-btn" onclick="filterByDay('day3', event)">📅 Dzień 3 (Niedziela)</button>
+            <button class="day-btn" onclick="filterByDay('day4', event)">📅 Dzień 4 (Poniedziałek)</button>
+            <button class="day-btn gps-btn" onclick="locateUser()">📍 Moja pozycja</button>
+        </div>
+
+        <!-- Mapa -->
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([37.9765, 23.7265], 15);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles © Esri'
+        }).addTo(map);
+
+        const poiList = [
+            { name: "Athens Center Square Hotel", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9800, lng: 23.7258, desc: "Twoja baza wypadowa. Tuż obok targu Varvakeios i Psiri.", icon: "🏨", tag: "Hotel" },
+            { name: "Agora Ateńska & Hefajstejon", days: ["day1"], cat: "sight", lat: 37.9749, lng: 23.7225, desc: "Centrum starożytnych Aten z najlepiej zachowaną świątynią.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
+            { name: "Monastiraki & Psiri (Street Food)", days: ["day1"], cat: "food", lat: 37.9761, lng: 23.7256, desc: "Kultowe souvlaki u O Thanasis i wieczorny klimat.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
+            { name: "Anafiotika & Plaka", days: ["day1"], cat: "sight", lat: 37.9728, lng: 23.7280, desc: "Malownicza wysepka u podnóża Akropolu i klimatyczne uliczki.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
+            
+            { name: "Akropol Ateński & Partenon", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Poranne zwiedzanie bez tłumów.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { name: "Nowe Muzeum Akropolu", days: ["day2"], cat: "sight", lat: 37.9684, lng: 23.7285, desc: "Światowej klasy eksponaty z widokiem na Partenon.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { name: "Plac Syntagma & Zmiana Warty", days: ["day2"], cat: "sight", lat: 37.9755, lng: 23.7348, desc: "Parlament i tradycyjna zmiana gwardzistów Evzones.", icon: "💂", tag: "Dzień 2 / Zabytek" },
+            { name: "Wzgórze Lycabettus", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – genialny zachód słońca nad miastem.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
+            { name: "Mavros Gatos (Psiri)", days: ["day2"], cat: "food", lat: 37.9774, lng: 23.7229, desc: "Tradycyjna kolacja w tawernie (saganaki, jagnięcina).", icon: "🥘", tag: "Dzień 2 / Kulinaria" },
+
+            { name: "Narodowe Muzeum Archeologiczne", days: ["day3"], cat: "sight", lat: 37.9890, lng: 23.7330, desc: "Największy skarbiec antycznych artefaktów w Grecji.", icon: "🏺", tag: "Dzień 3 / Zabytek" },
+            { name: "Epirus Tavern (Varvakeios)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Autentyczna jadłodajnia w hali targowej – domowa musaka i stifado.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
+            { name: "Świątynia Zeusa i Stadion Panatenajski", days: ["day3"], cat: "sight", lat: 37.9683, lng: 23.7411, desc: "Potężne kolumny Zeusa i stadion z białego marmuru.", icon: "🏟️", tag: "Dzień 3 / Zabytek" },
+            { name: "Karamanlidika tou Fani", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Wyjątkowa kolacja: bizantyjskie wędliny, sery i mezedes.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
+
+            { name: "Targ Varvakeios & Pamiątki", days: ["day4"], cat: "sight", lat: 37.9804, lng: 23.7270, desc: "Zakupy lokalnych greckich specjałów, oliwy i pamiątek przed wylotem.", icon: "🛍️", tag: "Dzień 4 / Inne" }
+        ];
+
+        let markers = [];
+        let userMarker = null;
+        let currentDay = 'all';
+        let currentCategory = 'all';
+
+        // Inicjalizacja markerów
+        poiList.forEach(poi => {
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="font-size:22px; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">${poi.icon}</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([poi.lat, poi.lng], { icon: customIcon }).addTo(map);
+            const googleNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
+
+            marker.bindPopup(`
+                <div class="popup-title">${poi.name}</div>
+                <span class="popup-tag">${poi.tag}</span>
+                <div class="popup-desc">${poi.desc}</div>
+                <a href="${googleNavUrl}" target="_blank" class="nav-btn" title="Nawiguj">🧭</a>
+            `);
+
+            marker.days = poi.days;
+            marker.category = poi.cat;
+            markers.push(marker);
+        });
+
+        // Globalna funkcja filtrowania (uwzględniająca oba filtry naraz)
+        function updateFilters() {
+            let bounds = [];
+
+            markers.forEach(marker => {
+                const matchDay = (currentDay === 'all' || marker.days.includes(currentDay));
+                const matchCat = (currentCategory === 'all' || marker.category === currentCategory);
+
+                if (matchDay && matchCat) {
+                    map.addLayer(marker);
+                    bounds.push(marker.getLatLng());
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+
+            if (currentDay !== 'all' && bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+            } else if (currentDay === 'all' && currentCategory === 'all') {
+                map.setView([37.9765, 23.7265], 15);
+            }
+        }
+
+        function filterByDay(day, evt) {
+            document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+            if (evt && evt.target) evt.target.classList.add('active');
+            currentDay = day;
+            updateFilters();
+        }
+
+        function filterByCategory(cat, evt) {
+            document.querySelectorAll('.top-btn').forEach(btn => btn.classList.remove('active'));
+            if (evt && evt.target) evt.target.classList.add('active');
+            currentCategory = cat;
+            updateFilters();
+        }
+
+        function locateUser() {
+            if (!navigator.geolocation) {
+                alert("Twoja przeglądarka nie wspiera geolokalizacji.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+
+                    const userIcon = L.divIcon({
+                        className: 'user-icon',
+                        html: `<div style="font-size:24px;">🔵</div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+
+                    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+                    userMarker.bindPopup("<b>Jesteś tutaj!</b>").openPopup();
+                    map.setView([lat, lng], 16);
+                },
+                () => {
+                    alert("Nie udało się pobrać lokalizacji. Upewnij się, że przyznałeś uprawnienia do GPS.");
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+    </script>
+</body>
+</html>
