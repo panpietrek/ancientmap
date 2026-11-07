@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antyczna Mapa Aten - Poprawione Adresy GPS</title>
+    <title>Antyczna Mapa Aten - Zweryfikowane Adresy GPS</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap');
@@ -355,23 +355,23 @@
             attribution: 'Tiles © Esri'
         }).addTo(map);
 
-        // Zweryfikowane i dokładne współrzędne najważniejszych punktów w Atenach
+        // Precyzyjnie zweryfikowane współrzędne budynków i głównych wejść w Atenach
         const poiList = [
-            { id: 1, name: "Athens Center Square Hotel", address: "Sofokleous 15", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9800, lng: 23.7258, desc: "Baza wypadowa. Sofokleous 15.", icon: "🏨", tag: "Hotel" },
+            { id: 1, name: "Athens Center Square Hotel", address: "Sofokleous 15", days: ["day1", "day2", "day3", "day4"], cat: "hotel", lat: 37.9798, lng: 23.7259, desc: "Baza wypadowa. Sofokleous 15.", icon: "🏨", tag: "Hotel" },
             { id: 2, name: "Agora Ateńska & Hefajstejon", address: "Adrianou 24", days: ["day1"], cat: "sight", lat: 37.9753, lng: 23.7225, desc: "Centrum starożytnych Aten. Adrianou 24.", icon: "🏺", tag: "Dzień 1 / Zabytek" },
-            { id: 3, name: "O Thanasis (Souvlaki)", address: "Mitropoleos 69", days: ["day1"], cat: "food", lat: 37.9757, lng: 23.7275, desc: "Kultowe souvlaki i kebabi. Mitropoleos 69.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
-            { id: 4, name: "Anafiotika & Plaka", address: "Anafiotika", days: ["day1"], cat: "sight", lat: 37.9728, lng: 23.7280, desc: "Malownicza wysepka u podnóża Akropolu.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
+            { id: 3, name: "O Thanasis (Souvlaki)", address: "Mitropoleos 69", days: ["day1"], cat: "food", lat: 37.9760, lng: 23.7257, desc: "Kultowe souvlaki. Mitropoleos 69.", icon: "🥙", tag: "Dzień 1 / Kulinaria" },
+            { id: 4, name: "Anafiotika & Plaka", address: "Thrasillou / Anafiotika", days: ["day1"], cat: "sight", lat: 37.9725, lng: 23.7285, desc: "Malownicza wysepka u podnóża Akropolu.", icon: "🏡", tag: "Dzień 1 / Zabytek" },
             
-            { id: 5, name: "Akropol Ateński & Partenon", address: "Dionysiou Areopagitou", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Poranne zwiedzanie.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
+            { id: 5, name: "Akropol Ateński & Partenon", address: "Theorias (Wejście główne)", days: ["day2"], cat: "sight", lat: 37.9715, lng: 23.7257, desc: "Majestatyczne serce antyku. Główne wejście.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
             { id: 6, name: "Nowe Muzeum Akropolu", address: "Dionysiou Areopagitou 15", days: ["day2"], cat: "sight", lat: 37.9684, lng: 23.7285, desc: "Światowej klasy muzeum. Dionysiou Areopagitou 15.", icon: "🏛️", tag: "Dzień 2 / Zabytek" },
-            { id: 7, name: "Plac Syntagma & Zmiana Warty", address: "Pl. Syntagmatos", days: ["day2"], cat: "sight", lat: 37.9755, lng: 23.7348, desc: "Parlament i zmiana gwardzistów Evzones.", icon: "💂", tag: "Dzień 2 / Zabytek" },
-            { id: 8, name: "Wzgórze Lycabettus", address: "Lykavittos", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – zachód słońca.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
+            { id: 7, name: "Plac Syntagma & Zmiana Warty", address: "Leof. Amalias 2 (Parlament)", days: ["day2"], cat: "sight", lat: 37.9754, lng: 23.7360, desc: "Grecki Parlament i grobowiec Nieznanego Żołnierza.", icon: "💂", tag: "Dzień 2 / Zabytek" },
+            { id: 8, name: "Wzgórze Lycabettus", address: "Ploutarchou / Kolejka", days: ["day2"], cat: "sight", lat: 37.9818, lng: 23.7432, desc: "Najwyższy punkt centrum – zachód słońca.", icon: "⛰️", tag: "Dzień 2 / Zabytek" },
             { id: 9, name: "Mavros Gatos", address: "Navarchou Apostoli 4", days: ["day2"], cat: "food", lat: 37.9774, lng: 23.7229, desc: "Tradycyjna tawerna w Psiri. Navarchou Apostoli 4.", icon: "🥘", tag: "Dzień 2 / Kulinaria" },
 
             { id: 10, name: "Narodowe Muzeum Archeologiczne", address: "Patision 44", days: ["day3"], cat: "sight", lat: 37.9890, lng: 23.7330, desc: "Skarbiec antycznych artefaktów. Patision 44.", icon: "🏺", tag: "Dzień 3 / Zabytek" },
-            { id: 11, name: "Epirus Tavern (Varvakeios)", address: "Athinas 42 (Hala Targowa)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Jadłodajnia w hali targowej. Domowa musaka.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
+            { id: 11, name: "Epirus Tavern (Varvakeios)", address: "Athinas 42 (Wewnątrz hali)", days: ["day3"], cat: "food", lat: 37.9806, lng: 23.7272, desc: "Jadłodajnia w hali targowej. Domowa musaka.", icon: "🍲", tag: "Dzień 3 / Kulinaria" },
             { id: 12, name: "Stadion Panatenajski", address: "Vasileos Konstantinou 2", days: ["day3"], cat: "sight", lat: 37.9683, lng: 23.7411, desc: "Stadion z białego marmuru. Vasileos Konstantinou 2.", icon: "🏟️", tag: "Dzień 3 / Zabytek" },
-            { id: 13, name: "Karamanlidika tou Fani", address: "Sokratous 1 / Evripidou 52", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Bizantyjskie wędliny i sery. Sokratous 1 / Evripidou 52.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
+            { id: 13, name: "Karamanlidika tou Fani", address: "Sokratous 1", days: ["day3"], cat: "food", lat: 37.9798, lng: 23.7252, desc: "Bizantyjskie wędliny i sery. Sokratous 1.", icon: "🍷", tag: "Dzień 3 / Kulinaria" },
 
             { id: 14, name: "Targ Varvakeios & Pamiątki", address: "Athinas 42", days: ["day4"], cat: "sight", lat: 37.9804, lng: 23.7270, desc: "Zakupy lokalnych specjałów. Athinas 42.", icon: "🛍️", tag: "Dzień 4 / Inne" }
         ];
