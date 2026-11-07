@@ -143,13 +143,42 @@
             box-shadow: -5px 0 15px rgba(0,0,0,0.3);
             z-index: 1000;
             transition: right 0.3s ease-in-out;
-            padding: 15px 10px 10px 10px;
+            padding: 10px 10px 10px 10px;
             box-sizing: border-box;
             overflow-y: auto;
         }
 
         #right-panel.open {
             right: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #8b5a2b;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .panel-header .sidebar-title {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .close-panel-btn {
+            background: #8b0000;
+            color: #fff;
+            border: 1px solid #d4af37;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            width: 24px;
+            height: 24px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
         }
 
         .poi-item {
@@ -302,7 +331,10 @@
 
     <!-- Prawy rozwijany panel atrakcji -->
     <div id="right-panel">
-        <div class="sidebar-title">Atrakcje w widoku</div>
+        <div class="panel-header">
+            <div class="sidebar-title">Atrakcje w widoku</div>
+            <button class="close-panel-btn" onclick="toggleRightPanel()" title="Zamknij listę">✖</button>
+        </div>
         <div id="panel-poi-list">
             <!-- Tutaj dynamicznie ładują się punkty -->
         </div>
